@@ -1,20 +1,24 @@
 import { View, Text, StyleSheet, FlatList } from "react-native";
 import AddExpenseButton from "../components/AddExpenseButton";
-import { useLayoutEffect } from "react";
+import { useLayoutEffect, useState } from "react";
 import { useNavigation } from "@react-navigation/native";
-import { EXPENSES } from "../dummydata/Expenses";
 import ExpenseItem from "../components/ExpenseItem";
-
+import { useExpenses } from "../store/ExpenseContext";
+import { useModal } from "../store/ModalContext";
+import AddExpenseModal from "../components/AddExpenseModal";
 function RecentExpenses() {
+  const { expenses } = useExpenses();
+  const [selectedExpense, setSelectedExpense] = useState(null);
+  const { isModalVisible, openModal, closeModal } = useModal();
   const navigation = useNavigation();
-  const RecentExpenses = EXPENSES.filter((expense) => {
+  const RecentExpenses = expenses.filter((expense) => {
     const today = new Date();
     const date7daysAgo = new Date(
       today.getFullYear(),
       today.getMonth(),
       today.getDate() - 7
     );
-    return expense.date >= date7daysAgo.toISOString().slice(0, 10);
+    return new Date(expense.date) >= date7daysAgo;
   });
 
   const TotalRecent = RecentExpenses.map((e) => e.amount).reduce(
@@ -27,9 +31,26 @@ function RecentExpenses() {
     });
   });
 
-  const onPressAddExpense = () => {
-    console.log(`RECENTS : \n ${JSON.stringify(RecentExpenses)}`);
-  };
+  function handleEditExpense(expense) {
+    setSelectedExpense(expense); // Set the selected one
+    openModal();
+  }
+  function handleCloseModal() {
+    closeModal();
+    setTimeout(() => {
+      setSelectedExpense(null);
+    }, 300); // adjust if animation is longer/slower
+  }
+
+  function onPressAddExpense() {
+    setSelectedExpense(null); // 👈 make sure to do this!
+    openModal();
+  }
+
+  function handleAddExpense() {
+    console.log(`Expenses will be Added soon!`);
+    isModalVisible ? closeModal() : openModal();
+  }
   return (
     <View style={styles.container}>
       <View style={styles.recentTitleContainer}>
@@ -37,7 +58,7 @@ function RecentExpenses() {
         <Text
           style={[styles.recentText, { fontWeight: "bold" }, { fontSize: 18 }]}
         >
-          {TotalRecent}
+          RM {TotalRecent}
         </Text>
       </View>
       <FlatList
@@ -45,7 +66,15 @@ function RecentExpenses() {
         showsVerticalScrollIndicator={false}
         keyExtractor={(item) => item.id}
         data={RecentExpenses}
-        renderItem={(itemData) => <ExpenseItem expense={itemData.item} />}
+        renderItem={(itemData) => (
+          <ExpenseItem expense={itemData.item} onSelected={handleEditExpense} />
+        )}
+      />
+      <AddExpenseModal
+        visible={isModalVisible}
+        onClose={handleCloseModal}
+        onAddExpense={handleAddExpense}
+        selectedExpense={selectedExpense}
       />
     </View>
   );
@@ -64,6 +93,8 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     padding: 10,
+    margin: 10,
+    paddingHorizontal: 20,
     backgroundColor: "#2e4053",
     borderRadius: 10,
   },

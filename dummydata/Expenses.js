@@ -44,7 +44,7 @@ export const EXPENSES = [
   new Expense(
     "e13",
     1000,
-    "Cameron Highlands Trip",
+    "Cameron Trip",
     "2025-05-18",
     "Lesuire",
     "accessibility"

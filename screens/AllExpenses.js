@@ -1,41 +1,65 @@
 import { View, Text, StyleSheet, FlatList } from "react-native";
 import AddExpenseButton from "../components/AddExpenseButton";
 import { useNavigation } from "@react-navigation/native";
-import { useEffect, useLayoutEffect } from "react";
-import { EXPENSES } from "../dummydata/Expenses";
-import ExpenseItem from "../components/ExpenseItem";
+import { useEffect, useLayoutEffect, useState } from "react";
 
+import ExpenseItem from "../components/ExpenseItem";
+import { useModal } from "../store/ModalContext";
+import AddExpenseModal from "../components/AddExpenseModal";
+import { useExpenses } from "../store/ExpenseContext";
 function AllExpenses({ navigation }) {
+  const { expenses } = useExpenses();
+  const [selectedExpense, setSelectedExpense] = useState(null);
+  const { isModalVisible, openModal, closeModal } = useModal();
+
   useLayoutEffect(() => {
     navigation.setOptions({
       headerRight: () => <AddExpenseButton onPress={onPressAddExpense} />,
     });
   });
+
+  function handleEditExpense(expense) {
+    setSelectedExpense(expense); // Set the selected one
+    openModal();
+  }
+
   function onPressAddExpense() {
-    // console.log(`Add Expense Clicked in ALL EXPENSES`);
-    // console.log(`ALL EXPENSES: \n ${JSON.stringify(EXPENSES)}`);
-    const RecentExpenses = EXPENSES.filter((expense) => {
-      const today = new Date();
-      const expDate = new Date(expense.date);
+    setSelectedExpense(null); // 👈 make sure to do this!
+    openModal();
+  }
 
-      const diffTime = today - expDate;
-      const diffDays = diffTime / (1000 * 60 * 60 * 24);
+  function handleCloseModal() {
+    closeModal();
+    setTimeout(() => {
+      setSelectedExpense(null);
+    }, 300);
+  }
 
-      return diffDays >= 0 && diffDays <= 7;
-    });
-
-    console.log(`RECENT expenses : ${JSON.stringify(RecentExpenses)}`);
+  function handleAddExpense() {
+    console.log(`Expenses will be Added soon!`);
+    isModalVisible ? closeModal() : openModal();
   }
   return (
     <View style={styles.container}>
       <FlatList
         style={{ width: "100%" }}
         showsVerticalScrollIndicator={false}
-        data={EXPENSES}
+        data={expenses}
         keyExtractor={(item) => item.id}
         renderItem={(itemData) => {
-          return <ExpenseItem expense={itemData.item} />;
+          return (
+            <ExpenseItem
+              expense={itemData.item}
+              onSelected={handleEditExpense}
+            />
+          );
         }}
+      />
+      <AddExpenseModal
+        visible={isModalVisible}
+        onClose={handleCloseModal}
+        onAddExpense={handleAddExpense}
+        selectedExpense={selectedExpense}
       />
     </View>
   );
