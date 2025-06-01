@@ -1,16 +1,33 @@
-import { Text, View, StyleSheet } from "react-native";
-const ExpenseItem = ({ expense }) => {
-  return (
-    <View style={styles.container}>
-      <View style={styles.descriptionContainer}>
-        <Text style={styles.itemText}>{expense.description}</Text>
-        <Text style={styles.datetext}>{expense.date}</Text>
-      </View>
+import { Text, View, StyleSheet, Pressable } from "react-native";
 
-      <View style={styles.amountContainer}>
-        <Text style={styles.amount}>RM {expense.amount}</Text>
-      </View>
-    </View>
+const ExpenseItem = ({ expense, onSelected }) => {
+  function onPressHandler() {
+    console.log(`Expense : ${expense.description} - $`);
+    onSelected(expense);
+  }
+
+  return (
+    <Pressable onPress={onPressHandler}>
+      {({ pressed }) => (
+        <View style={[styles.container, pressed && styles.itemPressed]}>
+          <View style={styles.descriptionContainer}>
+            <Text
+              style={styles.itemText}
+              maxLength={10}
+              numberOfLines={1}
+              ellipsizeMode="tail"
+            >
+              {expense.description}
+            </Text>
+            <Text style={styles.datetext}>{expense.date}</Text>
+          </View>
+
+          <View style={styles.amountContainer}>
+            <Text style={styles.amount}>RM {expense.amount}</Text>
+          </View>
+        </View>
+      )}
+    </Pressable>
   );
 };
 
@@ -28,6 +45,10 @@ const styles = StyleSheet.create({
     shadowRadius: 6,
     shadowOpacity: 0.26,
     justifyContent: "space-between",
+  },
+
+  itemPressed: {
+    backgroundColor: "#c0c0c0",
   },
   descriptionContainer: {
     padding: 10,
