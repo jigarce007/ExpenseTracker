@@ -9,6 +9,7 @@
     "web": "expo start --web"
   },
   "dependencies": {
+    "ajv": "^8.17.1",
     "expo": "~53.0.9",
     "expo-status-bar": "~2.2.3",
     "react": "19.0.0",
