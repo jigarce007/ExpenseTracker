@@ -8,7 +8,7 @@ import { useModal } from "../store/ModalContext";
 import AddExpenseModal from "../components/AddExpenseModal";
 import { useExpenses } from "../store/ExpenseContext";
 function AllExpenses({ navigation }) {
-  const { expenses } = useExpenses();
+  const { expenses, deleteExpense } = useExpenses();
   const [selectedExpense, setSelectedExpense] = useState(null);
   const { isModalVisible, openModal, closeModal } = useModal();
 
@@ -21,6 +21,10 @@ function AllExpenses({ navigation }) {
   function handleEditExpense(expense) {
     setSelectedExpense(expense); // Set the selected one
     openModal();
+  }
+  function handleDeleteExpense(id) {
+    console.log(`Expense with id ${id} will be deleted soon!`);
+    deleteExpense(id);
   }
 
   function onPressAddExpense() {
@@ -51,6 +55,7 @@ function AllExpenses({ navigation }) {
             <ExpenseItem
               expense={itemData.item}
               onSelected={handleEditExpense}
+              onDelete={handleDeleteExpense}
             />
           );
         }}

@@ -1,33 +1,53 @@
-import { Text, View, StyleSheet, Pressable } from "react-native";
+import {
+  Text,
+  View,
+  StyleSheet,
+  Pressable,
+  TouchableOpacity,
+} from "react-native";
+import { Swipeable } from "react-native-gesture-handler";
+import Ionicons from "react-native-vector-icons/Ionicons";
 
-const ExpenseItem = ({ expense, onSelected }) => {
+const ExpenseItem = ({ expense, onSelected, onDelete }) => {
+  const renderRightActions = () => {
+    return (
+      <TouchableOpacity onPress={() => onDelete(expense.id)}>
+        <View style={styles.deleteBox}>
+          <Ionicons name="trash-outline" size={24} color="white" />
+        </View>
+      </TouchableOpacity>
+    );
+  };
+
   function onPressHandler() {
     console.log(`Expense : ${expense.description} - $`);
     onSelected(expense);
   }
 
   return (
-    <Pressable onPress={onPressHandler}>
-      {({ pressed }) => (
-        <View style={[styles.container, pressed && styles.itemPressed]}>
-          <View style={styles.descriptionContainer}>
-            <Text
-              style={styles.itemText}
-              maxLength={10}
-              numberOfLines={1}
-              ellipsizeMode="tail"
-            >
-              {expense.description}
-            </Text>
-            <Text style={styles.datetext}>{expense.date}</Text>
-          </View>
+    <Swipeable renderRightActions={renderRightActions}>
+      <Pressable onPress={onPressHandler}>
+        {({ pressed }) => (
+          <View style={[styles.container, pressed && styles.itemPressed]}>
+            <View style={styles.descriptionContainer}>
+              <Text
+                style={styles.itemText}
+                maxLength={10}
+                numberOfLines={1}
+                ellipsizeMode="tail"
+              >
+                {expense.description}
+              </Text>
+              <Text style={styles.datetext}>{expense.date}</Text>
+            </View>
 
-          <View style={styles.amountContainer}>
-            <Text style={styles.amount}>RM {expense.amount}</Text>
+            <View style={styles.amountContainer}>
+              <Text style={styles.amount}>RM {expense.amount}</Text>
+            </View>
           </View>
-        </View>
-      )}
-    </Pressable>
+        )}
+      </Pressable>
+    </Swipeable>
   );
 };
 
@@ -79,5 +99,12 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: "normal",
     marginStart: 5,
+  },
+  deleteBox: {
+    backgroundColor: "#d11a2a",
+    justifyContent: "center",
+    alignItems: "center",
+    width: 70,
+    height: "100%",
   },
 });

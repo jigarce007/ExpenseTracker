@@ -18,6 +18,7 @@ export default function AddExpenseModal({ visible, onClose, selectedExpense }) {
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState("");
   const [date, setDate] = useState(new Date());
+  const [errors, setErrors] = useState({});
 
   const [showPicker, setShowPicker] = useState(false);
   useEffect(() => {
@@ -33,7 +34,23 @@ export default function AddExpenseModal({ visible, onClose, selectedExpense }) {
       setCategory("");
       setDate(new Date());
     }
+    setErrors({});
   }, [selectedExpense, visible]);
+
+  const validate = () => {
+    const newErrors = {};
+    if (!amount || isNaN(amount)) {
+      newErrors.amount = "Amount is required";
+    }
+    if (!description) {
+      newErrors.description = "Description is required";
+    }
+    if (!category) {
+      newErrors.category = "Category is required";
+    }
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   function handleSubmit() {
     const expenseData = {
@@ -44,21 +61,22 @@ export default function AddExpenseModal({ visible, onClose, selectedExpense }) {
       date: date.toISOString().split("T")[0],
     };
 
+    if (!validate()) {
+      console.log("Invalid form");
+      return; // ⛔️ Prevent closing modal
+    }
+
     if (selectedExpense) {
       updateExpense(expenseData.id, expenseData);
-      // Reset form before closing
-      setAmount("");
-      setDescription("");
-      setCategory("");
-      setDate(new Date());
     } else {
       addExpense(expenseData);
-      // Reset form before closing
-      setAmount("");
-      setDescription("");
-      setCategory("");
-      setDate(new Date());
     }
+
+    // ✅ Clear form and close only if valid
+    setAmount("");
+    setDescription("");
+    setCategory("");
+    setDate(new Date());
 
     onClose();
   }
@@ -81,18 +99,25 @@ export default function AddExpenseModal({ visible, onClose, selectedExpense }) {
             value={String(amount)}
             onChangeText={setAmount}
           />
+          {errors.amount && <Text style={styles.error}>{errors.amount}</Text>}
           <TextInput
             style={styles.input}
             placeholder="Description"
             value={description}
             onChangeText={setDescription}
           />
+          {errors.description && (
+            <Text style={styles.error}>{errors.description}</Text>
+          )}
           <TextInput
             style={styles.input}
             placeholder="Category"
             value={category}
             onChangeText={setCategory}
           />
+          {errors.category && (
+            <Text style={styles.error}>{errors.category}</Text>
+          )}
 
           <View style={styles.dateContainer}>
             <Ionicons
@@ -199,5 +224,9 @@ const styles = StyleSheet.create({
     flex: 1,
     textAlign: "center",
     fontWeight: "bold",
+  },
+  error: {
+    color: "red",
+    marginBottom: 5,
   },
 });
